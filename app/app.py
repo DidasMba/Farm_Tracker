@@ -19,7 +19,7 @@ class Category(db.Model):
 # Routes
 @app.route('/')
 def index():
-    return 'Welcome to Farm Tracker!'
+    return jsonify({'message': 'Welcome to Farm Tracker!'})
 
 @app.route('/items', methods=['POST'])
 def create_item():
