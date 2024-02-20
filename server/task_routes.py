@@ -25,3 +25,26 @@ def add_task():
     db.session.commit()
 
     return jsonify({'message': 'Task added successfully', 'task': new_task.to_dict()}), 201
+    
+@task_routes.route('/tasks/<int:task_id>/assign', methods=['PUT'])
+def assign_task(task_id):
+    data = request.json
+
+    # Validate request data
+    if not data.get('worker_id'):
+        return jsonify({'error': 'Worker ID is required'}), 400
+
+    # Retrieve task and worker from database
+    task = Task.query.get(task_id)
+    worker = Worker.query.get(data['worker_id'])
+    if not task or not worker:
+        return jsonify({'error': 'Task or Worker not found'}), 404
+
+    # Assign task to worker
+    task.assigned_worker_id = worker.id
+
+    # Commit changes to database
+    db.session.commit()
+
+    return jsonify({'message': 'Task assigned successfully', 'task': task.to_dict()}), 200
+
