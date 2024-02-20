@@ -2,7 +2,7 @@
 
 import unittest
 from app import app, db
-from models import Item
+from models import Item, Category
 
 class TestItemEndpoints(unittest.TestCase):
     def setUp(self):
@@ -49,3 +49,6 @@ class TestItemEndpoints(unittest.TestCase):
         response = self.app.get('/items')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json), 2)
+
+if __name__ == '__main__':
+    unittest.main()
