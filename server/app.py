@@ -1,4 +1,8 @@
+# app.py
+
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from models import db, User, register_user, check_user_credentials
 
@@ -6,7 +10,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///farm_management.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'secrets.token_urlsafe(32)'
-
+migrate=Migrate(app,db)
 db.init_app(app)
 jwt = JWTManager(app)
 
@@ -18,6 +22,7 @@ def register():
     try:
         data = request.json  # Get JSON data from request
         username = data.get('username')
+        email = data.get('email')  # Make sure to get email from request data
         password = data.get('password')
         
         if not username or not username.isalpha():
@@ -26,11 +31,14 @@ def register():
         if not password:  # Check if password is provided
             return jsonify({"msg": "Password is required."}), 400
         
-        register_user(username, password)
+        register_user(username, password, email)  # Pass username and password to register_user function
         return jsonify({"msg": "User created successfully"}), 201
     except ValueError as e:
         return jsonify({"msg": str(e)}), 400
-    
+    from flask import jsonify
+
+#from flask import jsonify
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json.get('username', None)
@@ -39,7 +47,12 @@ def login():
 
     if user and user.check_password(password):
         access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), 200
+        return jsonify({
+            "name": user.username,
+            "email": user.email,
+            "access_token": access_token
+            
+        }), 200
     else:
         return jsonify({"msg": "User not found or wrong credentials"}), 401
 
@@ -63,6 +76,12 @@ def update_user(username):
         return jsonify({"msg": f"Password for user {username} updated successfully"}), 200
     else:
         return jsonify({"msg": f"User {username} not found"}), 404
+
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    user_list = [{'username': user.username, 'email': user.email} for user in users]
+    return jsonify(user_list), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
