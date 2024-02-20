@@ -17,6 +17,10 @@ class Category(db.Model):
     items = db.relationship('Item', backref='category', lazy=True)
 
 # Routes
+@app.route('/')
+def index():
+    return 'Welcome to Farm Tracker!'
+
 @app.route('/items', methods=['POST'])
 def create_item():
     data = request.get_json()
