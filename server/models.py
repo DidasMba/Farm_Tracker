@@ -13,6 +13,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
+    role = db.Column(db.String(20), nullable=False, default='user')
     tasks = db.relationship('Task', backref='assigned_user', lazy=True)
     inventory = db.relationship('Inventory', backref='user', lazy=True)
     reports = db.relationship('Report', back_populates='user', lazy=True)
@@ -42,6 +43,7 @@ def check_user_credentials(username, password):
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    task_type = db.Column(db.String(50)) 
     description = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = relationship("User", backref='task_user', lazy=True)  # Change backref name here
@@ -72,3 +74,11 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     items = relationship("Item", back_populates="category")
+
+# class Notifications(db.Model):
+#     notification_id = db.Column(db.Integer, primary_key=True)
+#     farmer_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+#     email = db.Column(db.String(254), unique=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+#     message = db.Column(db.Text)
+#     timestamp = db.Column(db.DateTime, index=True)
